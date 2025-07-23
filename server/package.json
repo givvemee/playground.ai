@@ -25,11 +25,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/h3": "^2.0.0",
     "@google/generative-ai": "^0.24.1",
     "@qdrant/js-client-rest": "^1.15.0",
     "@xenova/transformers": "^2.17.2",
     "dotenv": "^17.2.0",
-    "effect": "latest"
+    "effect": "latest",
+    "graphql": "^16.11.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
