@@ -16,4 +16,5 @@ scratchpad/*
 .env.test.local
 .env.production.local
 
+/README.md
 /happytalk_help
