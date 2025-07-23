@@ -28,6 +28,9 @@ importers:
       '@qdrant/js-client-rest':
         specifier: ^1.15.0
         version: 1.15.0(typescript@5.8.3)
+      '@types/uuid':
+        specifier: ^10.0.0
+        version: 10.0.0
       '@xenova/transformers':
         specifier: ^2.17.2
         version: 2.17.2
@@ -40,6 +43,9 @@ importers:
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
     devDependencies:
       '@babel/cli':
         specifier: ^7.24.8
@@ -1096,6 +1102,9 @@ packages:
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
+
+  '@types/uuid@10.0.0':
+    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/yargs-parser@21.0.3':
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -4296,6 +4305,8 @@ snapshots:
   '@types/stack-utils@2.0.3': {}
 
   '@types/unist@2.0.11': {}
+
+  '@types/uuid@10.0.0': {}
 
   '@types/yargs-parser@21.0.3': {}
 
