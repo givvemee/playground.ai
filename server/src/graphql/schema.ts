@@ -8,6 +8,17 @@ type Mutation {
   uploadKnowledgeBase(content: String!, title: String!): UploadResult!
 }
 
+type Subscription {
+  chatStream(sessionId: String!): ChatResponse!
+  typingIndicator(sessionId: String!): TypingStatus!
+}
+
+type TypingStatus {
+  userId: String!
+  isTyping: Boolean!
+  timestamp: String!
+}
+
 type ChatResponse {
   id: String!
   response: String!

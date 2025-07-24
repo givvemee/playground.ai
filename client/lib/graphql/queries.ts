@@ -37,3 +37,30 @@ export const UPLOAD_KNOWLEDGE = gql`
     }
   }
 `;
+
+// WebSocket Subscriptions
+export const CHAT_STREAM_SUBSCRIPTION = gql`
+  subscription ChatStream($sessionId: String!) {
+    chatStream(sessionId: $sessionId) {
+      id
+      response
+      sources {
+        id
+        title
+        content
+        score
+      }
+      timestamp
+    }
+  }
+`;
+
+export const TYPING_INDICATOR_SUBSCRIPTION = gql`
+  subscription TypingIndicator($sessionId: String!) {
+    typingIndicator(sessionId: $sessionId) {
+      userId
+      isTyping
+      timestamp
+    }
+  }
+`;

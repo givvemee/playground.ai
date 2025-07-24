@@ -103,6 +103,7 @@ export default [
       "@typescript-eslint/no-array-constructor": "off",
       "@typescript-eslint/no-use-before-define": "off",
       "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-unused-vars": "off",
 
       "@effect/dprint": ["error", {
         config: {
