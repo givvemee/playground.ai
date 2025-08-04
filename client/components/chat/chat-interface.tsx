@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot } from "lucide-react";
+import { useMutation } from "@apollo/client";
+import { CHAT_MUTATION } from "@/lib/graphql/queries";
+import { v4 as uuidv4 } from "uuid";
 
 interface Message {
   id: string;
@@ -17,8 +20,10 @@ interface Message {
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId] = useState(() => uuidv4()); // 세션 ID 생성
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const [sendMessage, { loading: isLoading }] = useMutation(CHAT_MUTATION);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -43,36 +48,27 @@ export function ChatInterface() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageText = input.trim();
     setInput("");
-    setIsLoading(true);
 
     try {
-      // TODO: API 호출 구현
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { data } = await sendMessage({
+        variables: {
+          message: messageText,
+          sessionId: sessionId,
         },
-        body: JSON.stringify({
-          message: input.trim(),
-          history: messages,
-        }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to get response");
+      if (data?.chat) {
+        const assistantMessage: Message = {
+          id: data.chat.id,
+          content: data.chat.response,
+          role: "assistant",
+          timestamp: new Date(data.chat.timestamp),
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
       }
-
-      const data = await response.json();
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.response,
-        role: "assistant",
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage: Message = {
@@ -82,8 +78,6 @@ export function ChatInterface() {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
