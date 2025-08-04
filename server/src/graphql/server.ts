@@ -2,7 +2,8 @@ import { ApolloServer } from "@apollo/server"
 import { startStandaloneServer } from "@apollo/server/standalone"
 import { makeExecutableSchema } from "@graphql-tools/schema"
 import * as dotenv from "dotenv"
-import { useServer } from "graphql-ws/lib/use/ws"
+
+import { useServer } from "graphql-ws/use/ws"
 import { WebSocketServer } from "ws"
 import { initializeDB } from "../services/qdrant.js"
 import { resolvers } from "./resolvers.js"
@@ -28,7 +29,11 @@ export async function startGraphQLServer() {
       listen: { port: 4000 },
       context: async ({ req }) => ({
         headers: req.headers
-      })
+      }),
+      cors: {
+        origin: true,
+        credentials: true
+      }
     })
 
     // WebSocket 서버 추가 (포트 4001)
@@ -37,7 +42,6 @@ export async function startGraphQLServer() {
       path: "/graphql"
     })
 
-    // GraphQL Subscription을 WebSocket에 연결
     const serverCleanup = useServer({ schema }, wsServer)
 
     console.log(`🚀 GraphQL Server running on ${url}`)
