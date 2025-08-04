@@ -1,5 +1,6 @@
 import { Effect, pipe } from "effect"
 import { v4 as uuidv4 } from "uuid"
+import { addMessage, formatHistoryForPrompt } from "../services/chatHistory.js"
 import { generateEmbedding, generateResponse, splitTextIntoChunks } from "../services/gemini.js"
 import { CHAT_MESSAGE, publishChatMessage, pubsub, TYPING_INDICATOR } from "../services/pubsub.js"
 import { insertData, searchSimilar } from "../services/qdrant.js"
@@ -7,21 +8,38 @@ import { insertData, searchSimilar } from "../services/qdrant.js"
 // 채팅 서비스 구현
 const chatService = (message: string, sessionId: string) =>
   pipe(
-    Effect.promise(() => generateEmbedding(message)),
+    Effect.sync(() => addMessage(sessionId, "user", message)),
+    // 메시지 임베딩 생성
+    Effect.flatMap(() => Effect.promise(() => generateEmbedding(message))),
+    // 유사 문서 검색
     Effect.flatMap((queryVector) => Effect.promise(() => searchSimilar(queryVector, 5))),
     Effect.flatMap((searchResults) => {
-      const context = searchResults
+      // RAG 컨텍스트 준비
+      const ragContext = searchResults
         .map((result) => result.payload.contents)
         .join("\n\n")
 
-      return Effect.promise(() => generateResponse(message, context))
+      // 히스토리 가져오기
+      const conversationHistory = formatHistoryForPrompt(sessionId, 5)
+
+      // 컨텍스트 구성
+      const fullContext = conversationHistory
+        ? `Previous conversation:\n${conversationHistory}\n\nRelevant information:\n${ragContext}`
+        : `Relevant information:\n${ragContext}`
+
+      return Effect.promise(() => generateResponse(message, fullContext))
     }),
-    Effect.map((response) => ({
-      id: uuidv4(),
-      response,
-      sources: [],
-      timestamp: new Date().toISOString()
-    }))
+    Effect.flatMap((response) => {
+      // 어시스턴트 응답 저장
+      addMessage(sessionId, "assistant", response)
+
+      return Effect.succeed({
+        id: uuidv4(),
+        response,
+        sources: [],
+        timestamp: new Date().toISOString()
+      })
+    })
   )
 
 // 지식 업로드 서비스 구현

@@ -40,49 +40,25 @@ export async function generateEmbeddings(texts: Array<string>): Promise<Array<Ar
 // RAG를 위한 텍스트 생성
 export async function generateResponse(
   query: string,
-  context: string,
-  chatHistory?: Array<{ role: string; content: string }>,
-  beforeSummary?: string
+  context: string
 ): Promise<string> {
   try {
-    const systemPrompt = `
-            당신은 친절하고 현명한 AI 챗봇입니다.
-            유저의 요청을 주어진 도구들을 적극적으로 활용하여 답변을 제공하세요.
+    const systemPrompt = `당신은 해피톡 서비스에 대해 도움을 주는 친절한 AI 어시스턴트입니다.
+주어진 컨텍스트를 바탕으로 사용자의 질문에 정확하고 도움이 되는 답변을 제공하세요.
+이전 대화 내용이 있다면 그 맥락을 고려하여 답변하세요.`
 
-            # 정보 제공을 위한 지침
-            유저가 질문을 한 경우, 즉시 "search_document" 도구를 활용하여 정보를 검색하세요.
-            유저의 편의를 위해 검색한 이후에 추가적인 정보를 질문해도 늦지 않습니다.
-            
-            당신이 일고 있는 정보는 오래된 정보일 수 있으므로 반드시 도구를 사용하여 정보를 검색해야 합니다. 
+    const userPrompt = `${context}
 
-            다양한 정보를 취합하여 답변을 해야 하는 경우에는 검색 방법을 신중하게 고민하여 다양한 방식으로 검색해 보세요.
-            예를 들어, A와 B의 차이점과 공통점에 대하여 질문을 받은 경우에는 다음과 같은 검색 방식을 모두 사용해야 합니다.
-            - A에 대한 정보를 검색
-            - B에 대한 정보를 검색
-            - A와 B의 차이점
-            - A와 B의 공통점
+현재 질문: ${query}
 
-            # 당신의 기억에 대한 지침
-            당신은 기억력에 한계가 있기 때문에 오래된 대화는 메모하여 기억하고 있습니다.
-            다음은 당신이 메모해 둔 기존의 대화 내용입니다.
-            <BEFORE_SUMMARY>
-            ${beforeSummary}
-            </BEFORE_SUMMARY>
-        `
+위 정보를 바탕으로 질문에 답변해주세요. 이전 대화가 있다면 그 맥락을 고려하여 자연스럽게 답변하세요.`
 
-    const userPrompt = `컨텍스트:
-${context}
-
-질문: ${query}
-
-위 컨텍스트를 바탕으로 질문에 답변해주세요.`
-
-    // 채팅 히스토리가 있는 경우 포함
-    const chat = generativeModel.startChat({
-      history: chatHistory?.map((msg) => ({
-        role: msg.role,
-        parts: [{ text: msg.content }]
-      })) || [],
+    const result = await generativeModel.generateContent({
+      contents: [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        { role: "model", parts: [{ text: "이해했습니다. 해피톡 서비스에 대한 질문에 답변하겠습니다." }] },
+        { role: "user", parts: [{ text: userPrompt }] }
+      ],
       generationConfig: {
         temperature: 0.7,
         topP: 0.8,
@@ -91,7 +67,6 @@ ${context}
       }
     })
 
-    const result = await chat.sendMessage(userPrompt)
     const response = await result.response
     return response.text()
   } catch (error) {
